@@ -37,21 +37,21 @@ def _describe(name: str, obj: object) -> None:
     _say(f"       {name}: {kind}{extra}")
 
 
-def _parent_slot(skimage2_morph: types.ModuleType, key: str = "max_tree") -> None:
-    if key in skimage2_morph.__dict__:
+def _parent_slot(like_skimage2_morph: types.ModuleType, key: str = "max_tree") -> None:
+    if key in like_skimage2_morph.__dict__:
         _describe(
-            f"{skimage2_morph.__name__}.__dict__['{key}']",
-            skimage2_morph.__dict__[key],
+            f"{like_skimage2_morph.__name__}.__dict__['{key}']",
+            like_skimage2_morph.__dict__[key],
         )
         _say(
             f"       → '{key}' is already in the package __dict__; "
             "Python will not call __getattr__ for this name."
         )
     else:
-        _say(f"       {skimage2_morph.__name__}.__dict__['{key}']: (absent)")
+        _say(f"       {like_skimage2_morph.__name__}.__dict__['{key}']: (absent)")
         has_lazy = (
-            hasattr(skimage2_morph, "__getattr__")
-            and skimage2_morph.__getattr__ is not None
+            hasattr(like_skimage2_morph, "__getattr__")
+            and like_skimage2_morph.__getattr__ is not None
         )
         _say(
             f"       → '{key}' is not cached on the package"
@@ -66,90 +66,90 @@ def _purge(prefix: str, *names: str) -> None:
         sys.path.remove(prefix)
 
 
-def _run(label: str, src: Path, skimage2_pkg: str, skimage_pkg: str) -> None:
+def _run(label: str, src: Path, like_skimage2_pkg: str, like_skimage_pkg: str) -> None:
     prefix = str(src)
     sys.path.insert(0, prefix)
 
-    skimage_morph_name = f"{skimage_pkg}.morphology"
-    skimage2_morph_name = f"{skimage2_pkg}.morphology"
-    skimage2_submod = f"{skimage2_morph_name}.max_tree"
-    skimage2_private_submod = f"{skimage2_morph_name}._max_tree"
-    skimage_shim_mod = f"{skimage_morph_name}.max_tree"
+    like_skimage_morph_name = f"{like_skimage_pkg}.morphology"
+    like_skimage2_morph_name = f"{like_skimage2_pkg}.morphology"
+    like_skimage2_submod = f"{like_skimage2_morph_name}.max_tree"
+    like_skimage2_private_submod = f"{like_skimage2_morph_name}._max_tree"
+    like_skimage_shim_mod = f"{like_skimage_morph_name}.max_tree"
 
     modules = [
-        skimage_pkg,
-        skimage_morph_name,
-        skimage_shim_mod,
-        skimage2_pkg,
-        skimage2_morph_name,
-        skimage2_submod,
-        skimage2_private_submod,
+        like_skimage_pkg,
+        like_skimage_morph_name,
+        like_skimage_shim_mod,
+        like_skimage2_pkg,
+        like_skimage2_morph_name,
+        like_skimage2_submod,
+        like_skimage2_private_submod,
     ]
 
     _heading(f"{label}  [{src.name}/]")
 
-    skimage2_module_file = (
+    like_skimage2_module_file = (
         "max_tree.py" if "broken" in label.lower() else "_max_tree.py"
     )
     shim_import = (
-        f"from {skimage2_submod} import *"
+        f"from {like_skimage2_submod} import *"
         if "broken" in label.lower()
-        else f"from {skimage2_private_submod} import *"
+        else f"from {like_skimage2_private_submod} import *"
     )
 
     _say("  Layout (maps to megamove):")
-    _say(f"    {skimage2_pkg}.morphology     — lazy package (__init__.py + __init__.pyi)")
-    _say(f"    {skimage2_pkg}.morphology.{skimage2_module_file}  — implementation")
-    _say(f"    {skimage_pkg}.morphology   — eager public API")
-    _say(f"    {skimage_pkg}.morphology.max_tree.py — shim: {shim_import}")
+    _say(f"    {like_skimage2_pkg}.morphology     — lazy package (__init__.py + __init__.pyi)")
+    _say(f"    {like_skimage2_pkg}.morphology.{like_skimage2_module_file}  — implementation")
+    _say(f"    {like_skimage_pkg}.morphology   — eager public API")
+    _say(f"    {like_skimage_pkg}.morphology.max_tree.py — shim: {shim_import}")
 
     import importlib
 
-    _step(1, f"Import lazy _skimage2 parent: {skimage2_morph_name}")
-    skimage2_morph = importlib.import_module(skimage2_morph_name)
-    _describe(skimage2_morph_name, skimage2_morph)
-    _parent_slot(skimage2_morph)
+    _step(1, f"Import lazy like_skimage2 parent: {like_skimage2_morph_name}")
+    like_skimage2_morph = importlib.import_module(like_skimage2_morph_name)
+    _describe(like_skimage2_morph_name, like_skimage2_morph)
+    _parent_slot(like_skimage2_morph)
     _say("       (Nothing has loaded the shim yet.)")
 
-    _step(2, f"Import skimage package (eager API): {skimage_morph_name}")
+    _step(2, f"Import like_skimage package (eager API): {like_skimage_morph_name}")
     _say("       Runs: from .max_tree import max_tree, ...")
-    _say(f"       That loads shim {skimage_shim_mod}, which runs:")
+    _say(f"       That loads shim {like_skimage_shim_mod}, which runs:")
     _say(f"         {shim_import}")
-    skimage_morph = importlib.import_module(skimage_morph_name)
-    _describe(skimage_morph_name, skimage_morph)
-    _describe(f"{skimage_morph_name}.max_tree", skimage_morph.max_tree)
-    _say("       skimage still works: its __init__ bound max_tree to the function.")
+    like_skimage_morph = importlib.import_module(like_skimage_morph_name)
+    _describe(like_skimage_morph_name, like_skimage_morph)
+    _describe(f"{like_skimage_morph_name}.max_tree", like_skimage_morph.max_tree)
+    _say("       like_skimage still works: its __init__ bound max_tree to the function.")
 
-    _step(3, "Re-check _skimage2 parent namespace (the clash)")
-    skimage2_morph = sys.modules[skimage2_morph_name]
-    _parent_slot(skimage2_morph)
-    if "max_tree" in skimage2_morph.__dict__ and isinstance(
-        skimage2_morph.__dict__["max_tree"], types.ModuleType
+    _step(3, "Re-check like_skimage2 parent namespace (the clash)")
+    like_skimage2_morph = sys.modules[like_skimage2_morph_name]
+    _parent_slot(like_skimage2_morph)
+    if "max_tree" in like_skimage2_morph.__dict__ and isinstance(
+        like_skimage2_morph.__dict__["max_tree"], types.ModuleType
     ):
         _say(
-            f"       Loading {skimage2_submod} registered the submodule on the parent."
+            f"       Loading {like_skimage2_submod} registered the submodule on the parent."
         )
         _say(
-            "       Code that does `from _skimage2.morphology import max_tree` or "
-            "`_skimage2.morphology.max_tree(...)` now sees a module, not the function."
+            "       Code that does `from like_skimage2.morphology import max_tree` or "
+            "`like_skimage2.morphology.max_tree(...)` now sees a module, not the function."
         )
 
-    _step(4, f"Access {skimage2_morph_name}.max_tree the way library users do")
-    bound = skimage2_morph.max_tree
-    _describe(f"{skimage2_morph_name}.max_tree", bound)
+    _step(4, f"Access {like_skimage2_morph_name}.max_tree the way library users do")
+    bound = like_skimage2_morph.max_tree
+    _describe(f"{like_skimage2_morph_name}.max_tree", bound)
     if isinstance(bound, types.ModuleType):
         _say("       BUG: expected a function, got a module.")
         fn = getattr(bound, "max_tree", None)
         if callable(fn):
             _say(
                 f"       The function still exists inside the submodule as "
-                f"{skimage2_submod}.max_tree (callable)."
+                f"{like_skimage2_submod}.max_tree (callable)."
             )
     elif callable(bound):
         _say("       OK: package namespace exposes the callable.")
 
     _step(5, "Why this matters for lazy_loader")
-    _say(f"       {skimage2_morph_name}.__init__.pyi declares:")
+    _say(f"       {like_skimage2_morph_name}.__init__.pyi declares:")
     if "broken" in label.lower():
         _say("         from .max_tree import max_tree")
     else:
@@ -158,8 +158,8 @@ def _run(label: str, src: Path, skimage2_pkg: str, skimage_pkg: str) -> None:
     _say("       but only if __getattr__ runs. A submodule already in __dict__ blocks that.")
 
     _step(6, "Summary")
-    if "max_tree" in skimage2_morph.__dict__ and isinstance(
-        skimage2_morph.__dict__["max_tree"], types.ModuleType
+    if "max_tree" in like_skimage2_morph.__dict__ and isinstance(
+        like_skimage2_morph.__dict__["max_tree"], types.ModuleType
     ):
         _say("       Submodule import via shim polluted the parent namespace.")
         _say("       Fix: rename implementation file so the shim imports e.g. _max_tree,")
@@ -183,14 +183,14 @@ def main() -> None:
     _run(
         "BROKEN — implementation module named max_tree",
         ROOT / "broken",
-        "_skimage2",
-        "skimage",
+        "like_skimage2",
+        "like_skimage",
     )
     _run(
         "FIXED — implementation module named _max_tree",
         ROOT / "fixed",
-        "_skimage2",
-        "skimage",
+        "like_skimage2",
+        "like_skimage",
     )
 
     _heading("Takeaway")
