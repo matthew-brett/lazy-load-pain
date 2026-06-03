@@ -171,14 +171,14 @@ def main() -> None:
     _run(
         "BROKEN — implementation module named max_tree",
         ROOT / "broken",
-        "impl_broken",
-        "compat_broken",
+        "_skimage2",
+        "skimage",
     )
     _run(
         "FIXED — implementation module named _max_tree",
         ROOT / "fixed",
-        "impl_fixed",
-        "compat_fixed",
+        "_skimage2",
+        "skimage",
     )
 
     _heading("Takeaway")
