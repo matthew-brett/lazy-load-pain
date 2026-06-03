@@ -13,13 +13,24 @@ implementation submodule by path — as the megamove `skimage` shims do.
 ## Run
 
 ```bash
-python3 show_broken.py
+python -c 'import like_skimage2.morphology; print(type(like_skimage2.morphology.max_tree))'
+python -c 'from like_skimage2.morphology import *; print(type(max_tree))'
+python -c 'from like_skimage2.morphology import max_tree; print(type(max_tree))'
+```
+
+You should see "function" for the first, "module" for the second and "function"
+for the third.
+
+Next try:
+
+```bash
+python show_broken.py
 ```
 
 and
 
 ```bash
-python3 show_broken.py
+python show_broken.py
 ```
 
 `show_broken.py` prints a step-by-step trace of imports and namespace state.
