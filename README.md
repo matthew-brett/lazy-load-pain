@@ -1,33 +1,35 @@
 # Module shadows function (megamove import clash)
 
-**Code written by Cursor / Composer 2.5**
+**Code written by Cursor / Composer 2.5, edited by MB**
 
-Minimal demo of why `max_tree.py` / `lookfor.py` had to become `_max_tree.py` /
-`_lookfor.py` after the megamove.
+Minimal demo of name resolution with lazy loading, where function name shadows
+module name.
 
-## Layout
+The `_skimage2` type packages has a function name `max_tree` that shadows the identically named `max_tree` module.  See: `like_skimage2.morphology`.
 
-- `broken/` — `like_skimage2.morphology.max_tree` (module name = function name)
-- `fixed/` — `like_skimage2.morphology._max_tree` (private implementation module)
-
-Both use a lazy parent package (`lazy_loader.attach_stub` + `__init__.pyi`), like
-`_skimage2.morphology` after the megamove.
-
-A compatibility shim (`like_skimage/morphology/max_tree.py`) imports the implementation
-submodule by path — as the megamove `skimage` shims do. (Each scenario lives under
-`broken/` or `fixed/` on `sys.path` so the demo does not collide with an installed
-scikit-image.)
+A compatibility shim (`like_skimage/morphology/max_tree.py`) imports the
+implementation submodule by path — as the megamove `skimage` shims do.
 
 ## Run
 
 ```bash
-python3 demo.py
+python3 show_broken.py
 ```
 
-`demo.py` prints a step-by-step trace of imports and namespace state.
+and
 
-Expected: **broken** shows `like_skimage2.morphology.max_tree` as a **module** after
-the shim loads; **fixed** leaves `max_tree` out of the parent `__dict__` until
-lazy export resolves the **function**.
+```bash
+python3 show_broken.py
+```
+
+`show_broken.py` prints a step-by-step trace of imports and namespace state.
+
+Expected: shows `like_skimage2.morphology.max_tree` as a **module** after
+first loading the shim in `like_skimage.morphology`.
+
+`show_not_broken.py` shows import `like_skimage2.morphology` first leads to
+correct resolution to the function in both cases.
+
+`show_broken2.py` is a somewhat less verbose script, showing the same problem.
 
 Requires `lazy_loader` (`pip install lazy_loader`).

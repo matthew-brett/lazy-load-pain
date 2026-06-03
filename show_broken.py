@@ -9,6 +9,8 @@
 #
 # The star import copies the function into the shim namespace; __init__.py then
 # binds that name on like_skimage.morphology. Result: a function.
+print('Importing shim')
+
 import like_skimage.morphology
 
 print(
@@ -27,6 +29,8 @@ print(
 
 # This import only loads the lazy parent package (__init__.py + lazy_loader stub).
 # It does not remove the submodule from __dict__.
+print('Importing implementation')
+
 import like_skimage2.morphology
 
 print(
